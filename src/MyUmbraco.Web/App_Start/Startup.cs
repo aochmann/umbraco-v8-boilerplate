@@ -3,8 +3,7 @@ using MyUmbraco.Web;
 using Owin;
 using Umbraco.Web;
 
-
-[assembly: OwinStartup(typeof(Startup))]
+[assembly: OwinStartup("CustomOwinStartup", typeof(Startup))]
 namespace MyUmbraco.Web
 {
     public class Startup : UmbracoDefaultOwinStartup
