@@ -1,4 +1,8 @@
-﻿using System.Configuration;
+﻿using System.Web.Http;
+using System.Web.Mvc;
+using LightInject;
+using LightInject.Microsoft.DependencyInjection;
+using LightInject.Mvc;
 using Microsoft.Owin;
 using MyUmbraco.Web;
 using Owin;
@@ -10,6 +14,7 @@ namespace MyUmbraco.Web
 {
     public class Startup : UmbracoDefaultOwinStartup
     {
+        protected IServiceContainer Container { get; set; }
         public override void Configuration(IAppBuilder app)
         {
             base.Configuration(app);
@@ -19,13 +24,23 @@ namespace MyUmbraco.Web
         protected override void ConfigureServices(IAppBuilder app, ServiceContext services)
         {
             base.ConfigureServices(app, services);
-            // todo: DI modules registration
+            Container = new ServiceContainer(ContainerOptions.Default.WithMicrosoftSettings());
+
+            Container.EnableMvc();
+            Container.EnablePerWebRequestScope();
+            Container.EnableWebApi(GlobalConfiguration.Configuration);
+
+            DependencyResolver.SetResolver(new LightInjectMvcDependencyResolver(Container)); //todo: better dependency resolver - nuget package
         }
 
         protected override void ConfigureMiddleware(IAppBuilder app)
         {
             base.ConfigureMiddleware(app);
-            // todo: runtime
+
+            using (var scope = Container.BeginScope())
+            {
+                // todo: Initializer
+            }
         }
     }
 }
