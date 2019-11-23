@@ -1,8 +1,12 @@
-﻿using System.Web.Http;
+﻿using System;
+using System.ComponentModel;
+using System.Configuration;
+using System.Web.Http;
 using System.Web.Mvc;
 using LightInject;
 using LightInject.Microsoft.DependencyInjection;
 using LightInject.Mvc;
+using Microsoft.AspNet.SignalR.Configuration;
 using Microsoft.Owin;
 using MyUmbraco.Web;
 using Owin;
@@ -40,7 +44,33 @@ namespace MyUmbraco.Web
             using (var scope = Container.BeginScope())
             {
                 // todo: Initializer
+                var intExample = AppSettings.Get<int>("intExample");
+                var decimalExample = AppSettings.Get<decimal>("decimalExample");
+                var dateTimeExample = AppSettings.Get<DateTime>("dateTimeExample");
+                var stringExample = AppSettings.Get<string>("stringExample");
+                var boolExample = AppSettings.Get<bool>("boolExample");
+                var notExistingKeyExample = AppSettings.Get<bool>("notExistingKeyExample");
+                var notExistingKey2Example = AppSettings.Get<string>("notExistingKeyExample");
+
             }
+        }
+    }
+
+    public static class AppSettings
+    {
+        public static T Get<T>(string key)
+        {
+            var appSetting = ConfigurationManager.AppSettings[key];
+
+            if (string.IsNullOrWhiteSpace(appSetting))
+            {
+                // We can also introduce Exception Pattern (custom exceptions)
+                // Depends on language version, we can use default instead of default(T)
+                return default(T);
+            }
+
+            var converter = TypeDescriptor.GetConverter(typeof(T));
+            return (T)converter.ConvertFromInvariantString(appSetting);
         }
     }
 }
